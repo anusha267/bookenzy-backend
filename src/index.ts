@@ -4,6 +4,7 @@ import authRoutes from "./routes/authRoutes";
 import bookRoutes from "./routes/bookRoutes";
 import logRoutes from "./routes/logRoutes";
 import shelfRoutes from "./routes/shelfRoutes";
+import rateLimit from "express-rate-limit";
 import { cors } from "./middleware/cors";
 import { authenticateJWT } from "./middleware/authMiddleware";
 import sql from "./config/database";
@@ -12,7 +13,13 @@ import sql from "./config/database";
 dotenv.config();
 
 const app = express();
+// Render (and most hosts) sit behind one proxy hop; needed for correct client IPs.
+app.set("trust proxy", 1);
 app.use(cors);
+
+// Basic abuse protection: 300 requests / 15 min per IP overall, 20 / 15 min for register and login.
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 300, standardHeaders: true, legacyHeaders: false }));
+const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 20, standardHeaders: true, legacyHeaders: false });
 app.use(express.json());
 
 // Lightweight health check (no database call), used by hosting platforms.
@@ -35,7 +42,7 @@ app.get("/v1/version", async (req, res) => {
 });
 
 // Define your routes
-app.use("/v1/auth", authRoutes);
+app.use("/v1/auth", authLimiter, authRoutes);
 app.use("/v1/shelf", shelfRoutes);
 app.use("/v1/books", authenticateJWT, bookRoutes);
 app.use("/v1/logs", authenticateJWT, logRoutes);
