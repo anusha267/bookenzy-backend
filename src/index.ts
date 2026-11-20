@@ -3,16 +3,13 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes";
 import bookRoutes from "./routes/bookRoutes";
 import logRoutes from "./routes/logRoutes";
-import { neon } from "@neondatabase/serverless";
+import sql from "./config/database";
 
 // Load environment variables from .env file
 dotenv.config();
 
 const app = express();
 app.use(express.json());
-
-// Initialize Neon SQL client
-const sql = neon(process.env.DATABASE_URL || "");
 
 // Lightweight health check (no database call), used by hosting platforms.
 app.get("/v1/health", (req, res) => {
