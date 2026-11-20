@@ -3,12 +3,16 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes";
 import bookRoutes from "./routes/bookRoutes";
 import logRoutes from "./routes/logRoutes";
+import shelfRoutes from "./routes/shelfRoutes";
+import { cors } from "./middleware/cors";
+import { authenticateJWT } from "./middleware/authMiddleware";
 import sql from "./config/database";
 
 // Load environment variables from .env file
 dotenv.config();
 
 const app = express();
+app.use(cors);
 app.use(express.json());
 
 // Lightweight health check (no database call), used by hosting platforms.
@@ -32,8 +36,9 @@ app.get("/v1/version", async (req, res) => {
 
 // Define your routes
 app.use("/v1/auth", authRoutes);
-app.use("/v1/books", bookRoutes);
-app.use("/v1/logs", logRoutes);
+app.use("/v1/shelf", shelfRoutes);
+app.use("/v1/books", authenticateJWT, bookRoutes);
+app.use("/v1/logs", authenticateJWT, logRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 8080;

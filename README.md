@@ -6,17 +6,21 @@ REST API for Bookenzy, a reading tracker. Built with Node.js, Express and TypeSc
 
 ## What works today
 
-| Endpoint | Status | Notes |
-| --- | --- | --- |
-| `POST /v1/auth/register` | Working | Body: `username`, `email`, `password`. Rejects duplicate email or username. Password stored as a bcrypt hash. |
-| `POST /v1/auth/login` | Working | Body: `username` or `email`, plus `password`. Returns `{ token, userId }`. The JWT is HS256 and expires in 1 hour. |
-| `GET /v1/health` | Working | Returns `{status: "ok"}`. No database call. |
-| `GET /v1/version` | Working | Returns the PostgreSQL version. Handy for checking the database connection. |
-| `POST /v1/books` | Partial | Inserts a book. Not behind authentication yet. |
-| `GET /v1/books` | Not implemented | Handler is a stub. |
-| `POST /v1/logs` | Partial | Creates a reading log entry (user, book, start time). Not behind authentication yet. |
+Live API (free Render tier, sleeps when idle so the first request can take up to a minute): https://bookenzy-backend.onrender.com
 
-`authenticateJWT` middleware exists in `src/middleware/authMiddleware.ts` but is not applied to any route yet.
+| Endpoint | Auth | Notes |
+| --- | --- | --- |
+| `GET /v1/health` | no | `{status: "ok"}`, no database call. |
+| `GET /v1/version` | no | PostgreSQL version, checks the database connection. |
+| `POST /v1/auth/register` | no | Body: `username`, `email`, `password`. Rejects duplicate email or username. bcrypt-hashed. |
+| `POST /v1/auth/login` | no | Body: `username` or `email`, plus `password`. Returns `{ token, userId }` (HS256 JWT, 1 hour). |
+| `GET /v1/shelf` | Bearer JWT | The signed-in user's shelf: `{ items: [...] }`. |
+| `POST /v1/shelf` | Bearer JWT | Add an item: `title`, `author`, optional `status` (`want`/`reading`/`finished`), `rating` (0-5), `coverId`, `pages`, `year`. |
+| `PATCH /v1/shelf/:id` | Bearer JWT | Update `status` and/or `rating`. Only your own items. |
+| `DELETE /v1/shelf/:id` | Bearer JWT | Remove an item. |
+| `POST /v1/books`, `POST /v1/logs` | Bearer JWT | Original catalogue and reading-log inserts (partial). `GET /v1/books` is still a stub. |
+
+CORS allows `https://anusha267.github.io` and `http://localhost:3000` (override with `CORS_ORIGINS`).
 
 ## Run it locally
 
@@ -33,7 +37,7 @@ npm start              # runs src/index.ts with ts-node on PORT (default 8080)
 Environment variables:
 
 - `DATABASE_URL`: PostgreSQL connection string
-- `BOOKENZY_JWT_SECRET`: long random string used to sign tokens. Always set it. If it is missing the code falls back to a placeholder secret, which is not safe.
+- `BOOKENZY_JWT_SECRET`: long random string used to sign tokens. Required; login fails without it.
 - `PORT`: optional, defaults to 8080
 
 Create the tables with `psql "$DATABASE_URL" -f schema.sql` (`schema.sql` is inferred from the models).
@@ -60,7 +64,6 @@ curl -X POST localhost:8080/v1/auth/login -H 'Content-Type: application/json' \
 ## Roadmap
 
 - Migrations
-- Protect book and log routes with the JWT middleware
 - Implement `GET /v1/books`, update and finish reading logs
 - Tests
 

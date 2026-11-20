@@ -37,3 +37,19 @@ CREATE TABLE IF NOT EXISTS read_logs (
 );
 
 CREATE INDEX IF NOT EXISTS read_logs_user_idx ON read_logs(user_id);
+
+-- Per-user reading shelf used by the web UI.
+CREATE TABLE IF NOT EXISTS shelf_items (
+  item_id    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id    UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  title      TEXT NOT NULL,
+  author     TEXT NOT NULL,
+  status     TEXT NOT NULL DEFAULT 'want' CHECK (status IN ('want','reading','finished')),
+  rating     INTEGER NOT NULL DEFAULT 0 CHECK (rating BETWEEN 0 AND 5),
+  cover_id   INTEGER,
+  pages      INTEGER,
+  year       INTEGER,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS shelf_items_user_idx ON shelf_items(user_id);
