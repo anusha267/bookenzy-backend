@@ -1,0 +1,17 @@
+# Render Blueprint: free web service, no card required.
+# Free instances sleep after ~15 minutes idle; the first request after that takes a while.
+services:
+  - type: web
+    name: bookenzy-backend
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: node dist/index.js
+    healthCheckPath: /v1/health
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: BOOKENZY_JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false # set in the Render dashboard; never commit it
