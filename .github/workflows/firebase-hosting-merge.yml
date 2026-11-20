@@ -1,8 +1,8 @@
 name: Deploy to Cloud Run on merge
+# Disabled on push: this project must not require a paid/billed account.
+# Cloud Run needs GCP billing. Run manually (workflow_dispatch) only if billing is ever enabled.
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   build_and_deploy:
