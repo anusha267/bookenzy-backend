@@ -14,6 +14,11 @@ app.use(express.json());
 // Initialize Neon SQL client
 const sql = neon(process.env.DATABASE_URL || "");
 
+// Lightweight health check (no database call), used by hosting platforms.
+app.get("/v1/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 // Test route to check database connection
 app.get("/v1/version", async (req, res) => {
   try {
