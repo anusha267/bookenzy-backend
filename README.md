@@ -1,66 +1,68 @@
-# bookenzy
+# bookenzy-backend
 
-bookenzy is a Node.js application for user authentication and management using JWT (JSON Web Tokens). Built with TypeScript and Express, it allows users to securely register and log in.
+REST API for Bookenzy, a reading tracker. Built with Node.js, Express and TypeScript, backed by PostgreSQL (Neon serverless driver).
 
-## Features
+**Status: early / work in progress.** Registration and login work. Book and reading-log endpoints are partial (see below). The companion front end is [bookenzy-ui](https://github.com/anusha267/bookenzy-ui).
 
-- User registration with unique email and username
-- JWT-based authentication
-- Password hashing with bcrypt
+## What works today
 
-## Tech Stack
+| Endpoint | Status | Notes |
+| --- | --- | --- |
+| `POST /v1/auth/register` | Working | Body: `username`, `email`, `password`. Rejects duplicate email or username. Password stored as a bcrypt hash. |
+| `POST /v1/auth/login` | Working | Body: `username` or `email`, plus `password`. Returns `{ token, userId }`. The JWT is HS256 and expires in 1 hour. |
+| `GET /v1/version` | Working | Returns the PostgreSQL version. Handy for checking the database connection. |
+| `POST /v1/books` | Partial | Inserts a book. Not behind authentication yet. |
+| `GET /v1/books` | Not implemented | Handler is a stub. |
+| `POST /v1/logs` | Partial | Creates a reading log entry (user, book, start time). Not behind authentication yet. |
 
-- **Node.js**
-- **Express**
-- **TypeScript**
-- **PostgreSQL**
-- **JWT**
-- **bcrypt**
-- **dotenv**
+`authenticateJWT` middleware exists in `src/middleware/authMiddleware.ts` but is not applied to any route yet.
 
-## Getting Started
+## Run it locally
 
-### Prerequisites
-
-- Node.js (v14 or higher)
-- PostgreSQL (v12 or higher)
-
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/bookenzy.git
-   cd bookenzy
-   ```
-2. Install dependencies:
+Prerequisites: Node.js 18+ and a PostgreSQL database (a free Neon project works).
 
 ```bash
-Copy code
+git clone https://github.com/anusha267/bookenzy-backend.git
+cd bookenzy-backend
 npm install
+cp .env.example .env   # then fill in the values
+npm start              # runs src/index.ts with ts-node on PORT (default 8080)
 ```
 
-3. Set up a .env file:
+Environment variables:
+
+- `DATABASE_URL`: PostgreSQL connection string
+- `BOOKENZY_JWT_SECRET`: long random string used to sign tokens. Always set it. If it is missing the code falls back to a placeholder secret, which is not safe.
+- `PORT`: optional, defaults to 8080
+
+The code expects `users`, `books` and `read_logs` tables. The schema is not in this repo yet.
+
+Try it:
 
 ```bash
-BOOKENZY_JWT_SECRET=your_secret_key
-DATABASE_URL=your_database_connection_string
+curl -X POST localhost:8080/v1/auth/register -H 'Content-Type: application/json' \
+  -d '{"username":"ada","email":"ada@example.com","password":"correct horse"}'
+curl -X POST localhost:8080/v1/auth/login -H 'Content-Type: application/json' \
+  -d '{"username":"ada","password":"correct horse"}'
 ```
 
-4. Start the server:
+## Scripts
 
-```bash
-npm run dev
-```
+- `npm start`: run with ts-node
+- `npm run build`: compile to `dist/` with `tsc`
+- `npm test`: no tests yet
 
-## API Endpoints
+## Roadmap
 
-- **POST /v1/register** - Register a new user
-- **POST /v1/login** - Log in a user
+- Add the SQL schema and migrations
+- Protect book and log routes with the JWT middleware
+- Implement `GET /v1/books`, update and finish reading logs
+- Tests
 
-## Contributing
+## Security note
 
-Contributions are welcome! Please fork the repository and submit a pull request.
+Never commit `.env` files. Use `.env.example` as the template.
 
 ## License
 
-This project is licensed under the MIT License.
+MIT
