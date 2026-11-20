@@ -42,14 +42,17 @@ export const createShelfItem = async (req: Request, res: Response) => {
 
 export const patchShelfItem = async (req: Request, res: Response) => {
   const id = String(req.params.id);
-  const { status, rating } = req.body || {};
+  const { status, rating, currentPage } = req.body || {};
   if (!UUID.test(id)) return res.status(404).json({ error: "Not found" });
   if (status !== undefined && !STATUSES.includes(status)) return res.status(400).json({ error: "invalid status" });
   if (rating !== undefined && (!Number.isInteger(rating) || rating < 0 || rating > 5)) {
     return res.status(400).json({ error: "invalid rating" });
   }
+  if (currentPage !== undefined && (!Number.isInteger(currentPage) || currentPage < 0 || currentPage > 100000)) {
+    return res.status(400).json({ error: "invalid currentPage" });
+  }
   try {
-    const item = await updateShelfItem(userId(req), id, { status, rating });
+    const item = await updateShelfItem(userId(req), id, { status, rating, currentPage });
     if (!item) return res.status(404).json({ error: "Not found" });
     res.json(item);
   } catch (e) {

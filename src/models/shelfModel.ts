@@ -11,6 +11,8 @@ export interface ShelfItem {
   coverId: number | null;
   pages: number | null;
   year: number | null;
+  currentPage: number;
+  finishedAt: string | null;
 }
 
 const toItem = (r: Record<string, any>): ShelfItem => ({
@@ -22,6 +24,8 @@ const toItem = (r: Record<string, any>): ShelfItem => ({
   coverId: r.cover_id,
   pages: r.pages,
   year: r.year,
+  currentPage: r.current_page,
+  finishedAt: r.finished_at ? new Date(r.finished_at).toISOString() : null,
 });
 
 export const listShelf = async (userId: string) =>
@@ -37,10 +41,16 @@ export const addShelfItem = async (
   return toItem(rows[0]);
 };
 
-export const updateShelfItem = async (userId: string, id: string, p: { status?: ShelfStatus; rating?: number }) => {
+export const updateShelfItem = async (userId: string, id: string, p: { status?: ShelfStatus; rating?: number; currentPage?: number }) => {
+  // finished_at is set when an item first becomes 'finished' and cleared if it moves back.
   const rows = await sql`UPDATE shelf_items
-    SET status = COALESCE(${p.status ?? null}, status),
-        rating = COALESCE(${p.rating ?? null}, rating),
+    SET finished_at = CASE
+          WHEN ${p.status ?? null}::text = 'finished' AND status <> 'finished' THEN now()
+          WHEN ${p.status ?? null}::text IS NOT NULL AND ${p.status ?? null}::text <> 'finished' THEN NULL
+          ELSE finished_at END,
+        status = COALESCE(${p.status ?? null}::text, status),
+        rating = COALESCE(${p.rating ?? null}::int, rating),
+        current_page = COALESCE(${p.currentPage ?? null}::int, current_page),
         updated_at = now()
     WHERE item_id = ${id} AND user_id = ${userId} RETURNING *`;
   return rows.length ? toItem(rows[0]) : null;

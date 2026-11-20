@@ -16,7 +16,7 @@ Live API (free Render tier, sleeps when idle so the first request can take up to
 | `POST /v1/auth/login` | no | Body: `username` or `email`, plus `password`. Returns `{ token, userId }` (HS256 JWT, 1 hour). |
 | `GET /v1/shelf` | Bearer JWT | The signed-in user's shelf: `{ items: [...] }`. |
 | `POST /v1/shelf` | Bearer JWT | Add an item: `title`, `author`, optional `status` (`want`/`reading`/`finished`), `rating` (0-5), `coverId`, `pages`, `year`. |
-| `PATCH /v1/shelf/:id` | Bearer JWT | Update `status` and/or `rating`. Only your own items. |
+| `PATCH /v1/shelf/:id` | Bearer JWT | Update `status`, `rating` and/or `currentPage`. `finishedAt` is set when an item becomes `finished`. Only your own items. |
 | `DELETE /v1/shelf/:id` | Bearer JWT | Remove an item. |
 | `POST /v1/books`, `POST /v1/logs` | Bearer JWT | Original catalogue and reading-log inserts (partial). `GET /v1/books` is still a stub. |
 

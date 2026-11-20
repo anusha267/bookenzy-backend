@@ -53,3 +53,7 @@ CREATE TABLE IF NOT EXISTS shelf_items (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS shelf_items_user_idx ON shelf_items(user_id);
+
+-- Reading progress (added after the first shelf release).
+ALTER TABLE shelf_items ADD COLUMN IF NOT EXISTS finished_at TIMESTAMPTZ;
+ALTER TABLE shelf_items ADD COLUMN IF NOT EXISTS current_page INTEGER NOT NULL DEFAULT 0 CHECK (current_page >= 0);
