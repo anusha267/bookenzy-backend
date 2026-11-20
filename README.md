@@ -1,6 +1,6 @@
 # bookenzy-backend
 
-REST API for Bookenzy, a reading tracker. Built with Node.js, Express and TypeScript, backed by PostgreSQL (Neon serverless driver).
+REST API for Bookenzy, a reading tracker. Built with Node.js, Express and TypeScript, backed by PostgreSQL (node-postgres).
 
 **Status: early / work in progress.** Registration and login work. Book and reading-log endpoints are partial (see below). The companion front end is [bookenzy-ui](https://github.com/anusha267/bookenzy-ui).
 
