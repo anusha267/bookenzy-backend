@@ -4,8 +4,12 @@ import { getUserByUsernameOrEmail } from "../models/userModel"; // Import a func
 import jwt from "jsonwebtoken";
 import { User } from "../models/userModel"; // Ensure you have the User interface imported
 
-const BOOKENZY_JWT_SECRET =
-  process.env.BOOKENZY_JWT_SECRET || "your_default_jwt_secret"; // Use a strong secret key
+// Read lazily so dotenv has loaded; never fall back to a default secret.
+const jwtSecret = (): string => {
+  const secret = process.env.BOOKENZY_JWT_SECRET;
+  if (!secret) throw new Error("BOOKENZY_JWT_SECRET must be set");
+  return secret;
+};
 
 export const registerUser = async (
   email: string,
@@ -44,7 +48,7 @@ export const loginUser = async (usernameOrEmail: string, password: string) => {
         ...user,
       },
     },
-    BOOKENZY_JWT_SECRET,
+    jwtSecret(),
     {
       expiresIn: "1h",
       algorithm: "HS256",
