@@ -39,7 +39,6 @@ coverage/
 *.zip
 
 # npm package-lock
-package-lock.json
 
 # Jest
 jest-test-results.json
