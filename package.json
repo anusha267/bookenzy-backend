@@ -7,7 +7,7 @@
     "start": "ts-node src/index.ts",
     "start:uat": "NODE_ENV=uat ts-node src/index.ts",
     "start:prod": "NODE_ENV=prod ts-node src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
     "build": "tsc",
     "build:dev": "NODE_ENV=development npm run build",
     "build:uat": "NODE_ENV=uat npm run build",
@@ -32,8 +32,12 @@
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.8.6",
     "@types/pg": "^8.11.10",
+    "@types/supertest": "^7.2.1",
     "nodemon": "^3.1.7",
+    "pg-mem": "^3.0.14",
+    "supertest": "^7.3.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vitest": "^5.1.2"
   }
 }
